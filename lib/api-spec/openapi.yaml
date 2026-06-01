@@ -1,0 +1,255 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: applications
+    description: Job application operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /applications:
+    get:
+      operationId: listApplications
+      tags: [applications]
+      summary: List all job applications
+      responses:
+        "200":
+          description: List of applications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Application"
+    post:
+      operationId: createApplication
+      tags: [applications]
+      summary: Create a new job application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /applications/{id}:
+    get:
+      operationId: getApplication
+      tags: [applications]
+      summary: Get a single job application
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Application found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateApplication
+      tags: [applications]
+      summary: Update a job application
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteApplication
+      tags: [applications]
+      summary: Delete a job application
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    Application:
+      type: object
+      required:
+        - id
+        - company
+        - role
+        - location
+        - status
+        - appliedDate
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+        company:
+          type: string
+        role:
+          type: string
+        location:
+          type: string
+        status:
+          type: string
+        appliedDate:
+          type: string
+        followUpDate:
+          type: ["string", "null"]
+        salary:
+          type: ["string", "null"]
+        url:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    ApplicationInput:
+      type: object
+      required:
+        - company
+        - role
+        - location
+        - status
+        - appliedDate
+      properties:
+        company:
+          type: string
+          minLength: 1
+        role:
+          type: string
+          minLength: 1
+        location:
+          type: string
+          minLength: 1
+        status:
+          type: string
+        appliedDate:
+          type: string
+        followUpDate:
+          type: string
+        salary:
+          type: string
+        url:
+          type: string
+        notes:
+          type: string
+
+    ApplicationUpdate:
+      type: object
+      properties:
+        company:
+          type: string
+          minLength: 1
+        role:
+          type: string
+          minLength: 1
+        location:
+          type: string
+        status:
+          type: string
+        appliedDate:
+          type: string
+        followUpDate:
+          type: ["string", "null"]
+        salary:
+          type: ["string", "null"]
+        url:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
